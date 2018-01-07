@@ -15,8 +15,7 @@ add_library(bearlib SHARED IMPORTED)
 set_target_properties(bearlib PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/libBearLibTerminal.so)
 
 add_subdirectory(fmt)
-add_subdirectory(screen)
+#add_subdirectory(screen)
 
 add_executable(rl main.cc)
-add_dependencies(rl rlTerminal)
-target_link_libraries(rl rlTerminal bearlib fmt)
+target_link_libraries(rl bearlib fmt)

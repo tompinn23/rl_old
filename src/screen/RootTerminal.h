@@ -187,9 +187,9 @@
 class Cell
 {
 public:
-    Cell(x,y, char c);
+    Cell(int x, int y, char c);
 
-}
+};
 
 class RootTerminal : public Terminal
 {
