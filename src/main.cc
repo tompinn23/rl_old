@@ -2,14 +2,75 @@
 
 #include "BearLibTerminal.h"
 
-void DrawMenu();
+#include "generate.h"
+#include "player.h"
+#include "colors.h"
 
+using namespace std;
+void DrawMenu();
+void drawMap(vector<tile> map, player Player);
+void movePlayer(player Player);
 int main(int argc, char** argv)
 {
     terminal_open();
-    DrawMenu();
-    whi
+    //DrawMenu();
+    vector<tile> town = generate_surface();
+    player Player = player(1, 1, "tom");
+    while(true)
+    {
+        drawMap(town, Player);
+        movePlayer(Player);
+        terminal_refresh();
+    }
     return 0;
+}
+
+void drawMap(vector<tile> map, player Player)
+{
+    //printf("here?");
+    for(int i = 0; i < 60; i++)
+    {
+        for(int j = 0; j < 40; j++)
+        {
+            int map_x, map_y;
+            tie(map_x, map_y) = Player.screen_transform(i, j);
+            //out << map_x << "," << map_y << "\n";
+            tile t = get_tile(map_x, map_y, map);
+            switch(t)
+            {
+                case EMPTY:
+                    terminal_put(i, j, ' ');
+                    break;
+                case ROAD:
+                    terminal_put(i, j, '.');
+                    break;
+                case WALL:
+                    terminal_put(i, j, '#');
+                    break;
+                case WATER:
+                    terminal_color(LIGHT_BLUE);
+                    terminal_put(i, j, '~');
+                    terminal_color(WHITE);
+                    break;
+            }
+        }
+    }
+}
+
+void movePlayer(player Player)
+{
+    if(terminal_has_input())
+    {
+        int k = terminal_read();
+        if(k == TK_W)
+            Player.move_up();
+        else if(k == TK_A)
+            Player.move_left();
+        else if(k == TK_S)
+            Player.move_down();
+        else if(k == TK_D)
+            Player.move_right();
+    }
 }
 
 
@@ -21,4 +82,24 @@ void DrawMenu()
     terminal_refresh();
 }
 
-
+/*
+for(int i = 0; i < 256; i++)
+    {
+        for(int j = 0; j < 256; j++)
+        {
+            tile t = get_tile(i, j, town);
+            switch(t)
+            {
+                case EMPTY:
+                    terminal_put(i, j, ' ');
+                    break;
+                case ROAD:
+                    terminal_put(i, j, '.');
+                    break;
+                case WALL:
+                    terminal_put(i, j, '#');
+                    break;
+            }
+        }
+    }
+*/

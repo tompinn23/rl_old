@@ -17,5 +17,5 @@ set_target_properties(bearlib PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/l
 add_subdirectory(fmt)
 #add_subdirectory(screen)
 
-add_executable(rl main.cc)
+add_executable(rl main.cc generate.cc player.cc)
 target_link_libraries(rl bearlib fmt)
