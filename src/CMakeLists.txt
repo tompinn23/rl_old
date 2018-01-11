@@ -12,8 +12,12 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 
 
 add_library(bearlib SHARED IMPORTED)
+if(WIN32)
+set_target_properties(bearlib PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/BearLibTerminal.dll)
+set_target_properties(bearlib PROPERTIES IMPORTED_IMPLIB ${CMAKE_SOURCE_DIR}/lib/BearLibTerminal.lib)
+else()
 set_target_properties(bearlib PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/libBearLibTerminal.so)
-
+endif()
 add_subdirectory(fmt)
 #add_subdirectory(screen)
 
