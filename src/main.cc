@@ -17,6 +17,8 @@
 */
 #include <iostream>
 
+#include "Python.h"
+
 #include "BearLibTerminal.h"
 
 #include "generate.h"
@@ -30,7 +32,7 @@ void drawMap(vector<tile> map, player Player);
 void movePlayer(player &Player);
 int main(int argc, char** argv)
 {
-	read_rooms("data/surface/rooms.txt");
+	//read_rooms("data/surface/rooms.txt");
     terminal_open();
 	terminal_set("font: terminal_8x8.png, size=8x8;");
     //DrawMenu();
