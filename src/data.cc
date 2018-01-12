@@ -6,7 +6,6 @@ using namespace std;
 
 vector<vector<tile>> read_rooms(string path)
 {
-	cout << "get called?" << "\n";
 	ifstream* file = new ifstream(path, ifstream::in);
 	if (!file->is_open())
 	{
@@ -15,32 +14,40 @@ vector<vector<tile>> read_rooms(string path)
 		return vector<vector<tile>>();
 	}
 	char c = file->get();
-	while (file->good())
-	{
-		cout << c;
-		c = file->get();
-	}
+	string room_name = "";
 	while (file->good()) {
-		cout << c;
 		if (c == '/')
 		{
 			c = file->get();
-			cout << c;
 			if (c == '*')
 			{
 				c = file->get();
-				cout << c;
 				while (file->good() && c != '*')
 				{
 					c = file->get(); 
-					cout << c;
 				}
 				c = file->get();
+				c = file->get();
 			}
+		}
+		else if(isdigit(c))
+		{
+			continue;
+		}		
+		else if(c == '#')
+		{
+			c = file->get();
+			while(c != '\n')
+			{
+				room_name += c;
+				c = file->get();
+			}
+			
 		}
 		cout << c;
 		c = file->get();
 	}
+	cout << room_name << '\n';
 	delete file;
 	return vector<vector<tile>>();
 }
