@@ -27,7 +27,7 @@
 
 typedef unsigned char tile;
 
-void place_tile(int x, int y, tile Tile, std::vector<tile>& map);
+bool place_tile(int x, int y, tile Tile, std::vector<tile>& map);
 tile get_tile(int x, int y, std::vector<tile> map);
 std::vector<tile> generate_surface();
 

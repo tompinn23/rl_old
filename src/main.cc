@@ -20,6 +20,7 @@
 #include "BearLibTerminal.h"
 
 #include "generate.h"
+#include "data.h"
 #include "player.h"
 #include "colors.h"
 
@@ -29,7 +30,9 @@ void drawMap(vector<tile> map, player Player);
 void movePlayer(player &Player);
 int main(int argc, char** argv)
 {
+	read_rooms("./data/surface/srooms.txt");
     terminal_open();
+	terminal_set("font: terminal_8x8.png, size=8x8;");
     //DrawMenu();
     vector<tile> town = generate_surface();
     player Player = player(1, 1, "tom");
@@ -80,13 +83,13 @@ void movePlayer(player &Player)
     {
         int k = terminal_read();
         if(k == TK_W)
-            Player.move_up();
+            Player.move_player(0,-1);
         else if(k == TK_A)
-            Player.move_left();
+            Player.move_player(-1,0);
         else if(k == TK_S)
-            Player.move_down();
+            Player.move_player(0,1);
         else if(k == TK_D)
-            Player.move_right();
+            Player.move_player(1,0);
     }
 }
 

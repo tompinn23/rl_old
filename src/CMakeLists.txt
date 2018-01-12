@@ -21,5 +21,5 @@ endif()
 add_subdirectory(fmt)
 #add_subdirectory(screen)
 
-add_executable(rl main.cc generate.cc player.cc)
+add_executable(rl main.cc generate.cc player.cc data.cc)
 target_link_libraries(rl bearlib fmt)

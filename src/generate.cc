@@ -22,29 +22,27 @@
 
 using namespace std;
 
-void place_tile(int x, int y, tile Tile, vector<tile>& map)
+bool place_tile(int x, int y, tile Tile, vector<tile>& map)
 {
+	if (x < 0 || x > 255 || y < 0 || y > 255)
+		return false;
     map[256 * y + x] = Tile;
+	return true;
 }
 
 tile get_tile(int x, int y, vector<tile> map)
 {
-    try
-    {
-        return map.at(256 * y + x);
-    }
-    catch(const out_of_range &err)
-    {
-        return WATER;
-    }
+	if (x < 0 || x > 255 || y < 0 || y > 255)
+		return WATER;
+	return map.at(256 * y + x);
 }
 
 vector<tile> generate_surface()
 {
     vector<tile> town = vector<tile>();
     town.resize(65536, EMPTY);
-    place_tile(3, 4, ROAD, town);
-    place_tile(3, 3, ROAD, town);
+    place_tile(3, 4, WALL, town);
+    place_tile(3, 3, WALL, town);
     return town;
 }
 
