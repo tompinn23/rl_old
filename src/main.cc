@@ -31,10 +31,11 @@ void drawMap(vector<tile> map, player Player);
 void movePlayer(player &Player);
 int main(int argc, char** argv)
 {
-	register_rooms();
+	//register_rooms();
 	//read_rooms("data/surface/rooms.txt");
     terminal_open();
 	terminal_set("font: terminal_8x8.png, size=8x8;");
+	terminal_refresh();
     //DrawMenu();
     vector<tile> town = generate_surface();
     player Player = player(1, 1, "tom");
@@ -84,7 +85,9 @@ void movePlayer(player &Player)
     if(terminal_has_input())
     {
         int k = terminal_read();
-        if(k == TK_W)
+		if(k == TK_CLOSE)
+			terminal_close();
+        else if(k == TK_W)
             Player.move_player(0,-1);
         else if(k == TK_A)
             Player.move_player(-1,0);
@@ -92,6 +95,7 @@ void movePlayer(player &Player)
             Player.move_player(0,1);
         else if(k == TK_D)
             Player.move_player(1,0);
+		
     }
 }
 
