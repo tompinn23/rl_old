@@ -18,7 +18,9 @@ set_target_properties(bearlib PROPERTIES IMPORTED_IMPLIB ${CMAKE_SOURCE_DIR}/lib
 else()
 set_target_properties(bearlib PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/libBearLibTerminal.so)
 endif()
+
 add_subdirectory(fmt)
+add_subdirectory(duktape)
 #add_subdirectory(screen)
 
 add_executable(rl main.cc generate.cc player.cc interface.cc)
