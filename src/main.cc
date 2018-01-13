@@ -20,9 +20,8 @@
 #include "Python.h"
 
 #include "BearLibTerminal.h"
-
+#include "interface.h"
 #include "generate.h"
-#include "data.h"
 #include "player.h"
 #include "colors.h"
 
@@ -32,6 +31,7 @@ void drawMap(vector<tile> map, player Player);
 void movePlayer(player &Player);
 int main(int argc, char** argv)
 {
+	register_rooms();
 	//read_rooms("data/surface/rooms.txt");
     terminal_open();
 	terminal_set("font: terminal_8x8.png, size=8x8;");
@@ -103,25 +103,3 @@ void DrawMenu()
     terminal_print(4, 6, "3) Exit");
     terminal_refresh();
 }
-
-/*
-for(int i = 0; i < 256; i++)
-    {
-        for(int j = 0; j < 256; j++)
-        {
-            tile t = get_tile(i, j, town);
-            switch(t)
-            {
-                case EMPTY:
-                    terminal_put(i, j, ' ');
-                    break;
-                case ROAD:
-                    terminal_put(i, j, '.');
-                    break;
-                case WALL:
-                    terminal_put(i, j, '#');
-                    break;
-            }
-        }
-    }
-*/
