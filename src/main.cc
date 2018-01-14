@@ -29,8 +29,9 @@ using namespace std;
 void DrawMenu();
 void drawMap(vector<tile> map, player Player);
 void movePlayer(player &Player);
-int main(int argc, char** argv)
+int main(int argc, wchar_t** argv)
 {
+    initialize_interface(argc, argv);
 	//register_rooms();
 	//read_rooms("data/surface/rooms.txt");
     terminal_open();
