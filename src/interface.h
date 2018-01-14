@@ -1,8 +1,10 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
-#include <Python.h>
 
+
+#include <Python.h>
+#include <string>
 //Python Module
 
 
@@ -14,7 +16,7 @@
 //#include "duktape.h"
 //#include "duk_config.h"
 
-int initialize_interface(int argc, wchar_t **argv);
+int initialize_interface();
 
 
 

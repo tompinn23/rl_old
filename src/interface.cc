@@ -2,12 +2,40 @@
 #include <iostream>
 #include "interface.h"
 #include <cstdlib>
+#include <cstdio>
+
+#define _CRT_SECURE_NO_WARNINGS 1
 
 static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 {
-	PyDictObject* room;
+	PyObject* room;
 	if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &room))
 		return NULL;
+	PyObject* pyName = PyDict_GetItemString(room, "name");
+	PyObject* ascii_string = PyUnicode_AsASCIIString(pyName);
+	char* name = PyBytes_AsString(ascii_string);
+	std::string s = std::string(name);
+	std::cout << s << "\n";
+	if(PyDict_Contains(room, PyUnicode_FromString("attrs")))
+	{
+		std::cout << "ATTRS" << "\n";
+		PyObject* attrs = PyDict_GetItemString(room, "attrs");
+		for(int i = 0; i < PyList_Size(attrs); i++)
+		{
+			PyObject* item = PyList_GetItem(attrs, i);
+			PyObject* ascii_str = PyUnicode_AsASCIIString(item);
+			char* sItem = PyBytes_AsString(ascii_str);
+			std::cout << sItem << "\n";
+		}
+	}
+	PyObject* plan = PyDict_GetItemString(room, "plan");
+	for(int i = 0; i < PyList_Size(plan); i++)
+	{
+		PyObject* item = PyList_GetItem(plan, i);
+		PyObject* ascii_str = PyUnicode_AsASCIIString(item);
+		char* sItem = PyBytes_AsString(ascii_str);
+		std::cout << sItem << "\n";
+	}
 	
 	Py_RETURN_NONE;
 }
@@ -60,6 +88,7 @@ int initialize_interface()
 	PyImport_AppendInittab("rl", PyInit_rl);
 	Py_Initialize();
 	PyRun_SimpleString("from rl import *");
-	SSSS
+	FILE *fd = fopen("./lib/game/surface/rooms.py", "r");
+	PyRun_SimpleFileEx(fd, "rooms.py", 1);
 	return 0;
 }
