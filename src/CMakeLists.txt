@@ -6,7 +6,9 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/src)
-include_directories(${CMAKE_SOURCE_DIR}/src/duktape)
+include_directories(${CMAKE_SOURCE_DIR}/src/fmt)
+include_directories(${CMAKE_SOURCE_DIR}/src/whereami)
+
 
 find_package(PythonLibs REQUIRED)
 
@@ -21,7 +23,7 @@ set_target_properties(bearlib PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/l
 endif()
 
 add_subdirectory(fmt)
-add_subdirectory(duktape)
+add_subdirectory(whereami)
 #add_subdirectory(screen)
 
 add_executable(rl main.cc generate.cc player.cc interface.cc)

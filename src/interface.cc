@@ -5,6 +5,9 @@
 #include <cstdio>
 
 #define _CRT_SECURE_NO_WARNINGS 1
+#ifdef _WIN32_
+#include <Windows.h>	
+#endif
 
 static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 {
@@ -89,6 +92,11 @@ int initialize_interface()
 	Py_Initialize();
 	PyRun_SimpleString("from rl import *");
 	FILE *fd = fopen("./lib/game/surface/rooms.py", "r");
+	if(fd == NULL)
+	{
+		std::cerr << "Could not find file" << "\n";
+		return -1;
+	}
 	PyRun_SimpleFileEx(fd, "rooms.py", 1);
 	return 0;
 }
