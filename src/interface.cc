@@ -1,14 +1,14 @@
 // #include <Python.h>
 #include <iostream>
-#include "interface.h"
 #include <cstdlib>
 #include <cstdio>
 
-#define _CRT_SECURE_NO_WARNINGS 1
-#ifdef _WIN32_
-#include <Windows.h>	
-#endif
 
+#include "interface.h"
+#include "whereami.h"
+
+#define _CRT_SECURE_NO_WARNINGS 1
+using namespace std;
 static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 {
 	PyObject* room;
@@ -17,8 +17,8 @@ static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 	PyObject* pyName = PyDict_GetItemString(room, "name");
 	PyObject* ascii_string = PyUnicode_AsASCIIString(pyName);
 	char* name = PyBytes_AsString(ascii_string);
-	std::string s = std::string(name);
-	std::cout << s << "\n";
+	string s = std::string(name);
+	cout << s << "\n";
 	if(PyDict_Contains(room, PyUnicode_FromString("attrs")))
 	{
 		std::cout << "ATTRS" << "\n";
@@ -86,12 +86,14 @@ int register_rooms()
 }
 */
 
-int initialize_interface()
+int initialize_interface(string dir)
 {
 	PyImport_AppendInittab("rl", PyInit_rl);
 	Py_Initialize();
 	PyRun_SimpleString("from rl import *");
-	FILE *fd = fopen("./lib/game/surface/rooms.py", "r");
+	string libPath = "/lib/game/surface/rooms.py";
+	string file = dir + libPath;
+	FILE *fd = fopen(file.c_str(), "r");
 	if(fd == NULL)
 	{
 		std::cerr << "Could not find file" << "\n";

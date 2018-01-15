@@ -16,26 +16,41 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <iostream>
+#include <fstream>
 
 #include "Python.h"
 
 #include "BearLibTerminal.h"
+#include "whereami.h"
+#include "base64.h"
+#include "format.h"
+#include "main.h"
 #include "interface.h"
 #include "generate.h"
 #include "player.h"
 #include "colors.h"
 
 using namespace std;
+string dir;
+
+
 void DrawMenu();
 void drawMap(vector<tile> map, player Player);
 void movePlayer(player &Player);
 int main(int argc, wchar_t** argv)
 {
-    initialize_interface();
+    int length = wai_getExecutablePath(NULL, 0, NULL);
+	char* path = (char*)malloc(length + 1);
+	wai_getExecutablePath(path, length, NULL);
+	dir = string(path);
+	dir = dir.substr(0, dir.find_last_of("."));
+	dir = dir.substr(0, dir.size()-2);
+    cout << dir << "\n";
+    initialize_interface(dir);
 	//register_rooms();
 	//read_rooms("data/surface/rooms.txt");
     terminal_open();
-	terminal_set("font: terminal_8x8.png, size=8x8;");
+	terminal_set(fmt::format("font: {}, size=8x8;", dir+ "/terminal_8x8.png").c_str());
 	terminal_refresh();
     //DrawMenu();
     vector<tile> town = generate_surface();

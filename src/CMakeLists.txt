@@ -27,4 +27,4 @@ add_subdirectory(whereami)
 #add_subdirectory(screen)
 
 add_executable(rl main.cc generate.cc player.cc interface.cc)
-target_link_libraries(rl bearlib fmt ${PYTHON_LIBRARIES})
+target_link_libraries(rl bearlib fmt whereami ${PYTHON_LIBRARIES})
