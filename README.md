@@ -1,2 +1,2 @@
 # rl
-tldr
+tl;dr
