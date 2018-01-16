@@ -18,51 +18,25 @@
 #include <iostream>
 #include <fstream>
 
-#include "Python.h"
-
 #include "BearLibTerminal.h"
+
 #include "whereami.h"
-#include "base64.h"
 #include "format.h"
+#include "spdlog/spdlog.h"
+
 #include "main.h"
 #include "interface.h"
 #include "generate.h"
 #include "player.h"
 #include "colors.h"
 
+#define RL_VERSION "1.0.0"
+
 using namespace std;
+namespace spd = spdlog;
 string dir;
+static bool closed_flag = false;
 
-
-void DrawMenu();
-void drawMap(vector<tile> map, player Player);
-void movePlayer(player &Player);
-int main(int argc, wchar_t** argv)
-{
-    int length = wai_getExecutablePath(NULL, 0, NULL);
-	char* path = (char*)malloc(length + 1);
-	wai_getExecutablePath(path, length, NULL);
-	dir = string(path);
-	dir = dir.substr(0, dir.find_last_of("."));
-	dir = dir.substr(0, dir.size()-2);
-    cout << dir << "\n";
-    initialize_interface(dir);
-	//register_rooms();
-	//read_rooms("data/surface/rooms.txt");
-    terminal_open();
-	terminal_set(fmt::format("font: {}, size=8x8;", dir+ "/terminal_8x8.png").c_str());
-	terminal_refresh();
-    //DrawMenu();
-    vector<tile> town = generate_surface();
-    player Player = player(1, 1, "tom");
-    while(true)
-    {
-        drawMap(town, Player);
-        movePlayer(Player);
-        terminal_refresh();
-    }
-    return 0;
-}
 
 void drawMap(vector<tile> map, player Player)
 {
@@ -102,7 +76,10 @@ void movePlayer(player &Player)
     {
         int k = terminal_read();
 		if(k == TK_CLOSE)
+        {
 			terminal_close();
+            closed_flag = true;
+        }
         else if(k == TK_W)
             Player.move_player(0,-1);
         else if(k == TK_A)
@@ -123,3 +100,48 @@ void DrawMenu()
     terminal_print(4, 6, "3) Exit");
     terminal_refresh();
 }
+
+std::shared_ptr<spd::logger> init_logger()
+{
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
+    sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>("rl.log", 1048576 * 3, 3));
+    auto rl_log = std::make_shared<spd::logger>("rl_logger", begin(sinks), end(sinks));
+    spd::register_logger(rl_log);
+    return rl_log;
+}
+
+int main(int argc, wchar_t** argv)
+{
+    int length = wai_getExecutablePath(NULL, 0, NULL);
+	char* path = (char*)malloc(length + 1);
+	wai_getExecutablePath(path, length, NULL);
+	dir = string(path);
+	dir = dir.substr(0, dir.find_last_of("."));
+	dir = dir.substr(0, dir.size()-2);
+    free(path);
+    auto logger = init_logger();
+    spd::set_pattern("(%l) [%H:%M:%S %d/%m/%C] %v");
+    logger->info("Rl v{}", RL_VERSION);
+    if(initialize_interface(dir) == -1)
+	{
+		logger->error("Failed to read game data files.");
+        return -1;
+	}
+	//register_rooms();
+	//read_rooms("data/surface/rooms.txt");
+    terminal_open();
+	terminal_set(fmt::format("font: {}, size=8x8;", dir+ "/terminal_8x8.png").c_str());
+	terminal_refresh();
+    //DrawMenu();
+    vector<tile> town = generate_surface();
+    player Player = player(1, 1, "tom");
+    while(true && !closed_flag)
+    {
+        drawMap(town, Player);
+        movePlayer(Player);
+        terminal_refresh();
+    }
+    return 0;
+}
+

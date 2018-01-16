@@ -6,6 +6,7 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/src)
+
 include_directories(${CMAKE_SOURCE_DIR}/src/fmt)
 include_directories(${CMAKE_SOURCE_DIR}/src/whereami)
 

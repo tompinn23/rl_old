@@ -6,23 +6,35 @@
 
 #include "interface.h"
 #include "whereami.h"
+#include "spdlog/spdlog.h"
 
 #define _CRT_SECURE_NO_WARNINGS 1
 using namespace std;
+
+shared_ptr<spdlog::logger> rl_logger;
+
 static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 {
 	PyObject* room;
 	if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &room))
 		return NULL;
 	PyObject* pyName = PyDict_GetItemString(room, "name");
-	PyObject* ascii_string = PyUnicode_AsASCIIString(pyName);
-	char* name = PyBytes_AsString(ascii_string);
-	string s = std::string(name);
-	cout << s << "\n";
-	if(PyDict_Contains(room, PyUnicode_FromString("attrs")))
+	if(pyName != NULL)
+	{
+		PyObject* ascii_string = PyUnicode_AsASCIIString(pyName);
+		char* name = PyBytes_AsString(ascii_string);
+		string s = std::string(name);
+		cout << s << "\n";
+	}
+	else
+	{
+		rl_logger->error("Room Name was missing");
+		return PyErr_Format(PyExc_KeyError, "%s", "Room name was missing from declaration");
+	}
+	PyObject* attrs = PyDict_GetItemString(room, "attrs");
+	if(attrs != NULL)
 	{
 		std::cout << "ATTRS" << "\n";
-		PyObject* attrs = PyDict_GetItemString(room, "attrs");
 		for(int i = 0; i < PyList_Size(attrs); i++)
 		{
 			PyObject* item = PyList_GetItem(attrs, i);
@@ -32,13 +44,18 @@ static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 		}
 	}
 	PyObject* plan = PyDict_GetItemString(room, "plan");
-	for(int i = 0; i < PyList_Size(plan); i++)
+	if(plan != NULL)
 	{
-		PyObject* item = PyList_GetItem(plan, i);
-		PyObject* ascii_str = PyUnicode_AsASCIIString(item);
-		char* sItem = PyBytes_AsString(ascii_str);
-		std::cout << sItem << "\n";
+		for(int i = 0; i < PyList_Size(plan); i++)
+		{
+			PyObject* item = PyList_GetItem(plan, i);
+			PyObject* ascii_str = PyUnicode_AsASCIIString(item);
+			char* sItem = PyBytes_AsString(ascii_str);
+			std::cout << sItem << "\n";
+		}
 	}
+	else
+		return PyErr_Format(PyExc_KeyError, "%s", "Room plan was missing from declaration");
 	
 	Py_RETURN_NONE;
 }
@@ -88,6 +105,7 @@ int register_rooms()
 
 int initialize_interface(string dir)
 {
+	rl_logger = spdlog::get("rl_logger");
 	PyImport_AppendInittab("rl", PyInit_rl);
 	Py_Initialize();
 	PyRun_SimpleString("from rl import *");
@@ -99,6 +117,5 @@ int initialize_interface(string dir)
 		std::cerr << "Could not find file" << "\n";
 		return -1;
 	}
-	PyRun_SimpleFileEx(fd, "rooms.py", 1);
-	return 0;
+	return PyRun_SimpleFileEx(fd, file.c_str(), 1);
 }
