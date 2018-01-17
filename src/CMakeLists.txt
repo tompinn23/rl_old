@@ -27,5 +27,12 @@ add_subdirectory(fmt)
 add_subdirectory(whereami)
 #add_subdirectory(screen)
 
-add_executable(rl main.cc generate.cc player.cc interface.cc)
+add_executable(rl main.cc generate.cc player.cc interface.cc portability.cc)
 target_link_libraries(rl bearlib fmt whereami ${PYTHON_LIBRARIES})
+
+add_custom_command(
+ TARGET ${PROJECT_NAME} POST_BUILD
+ COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data/lib ${CMAKE_BINARY_DIR}/bin/lib 
+ DEPENDS ${destination}
+ COMMENT "copy link resources folder from ${source} => ${destination}"
+)

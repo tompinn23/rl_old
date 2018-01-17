@@ -16,8 +16,8 @@
 //#include "duktape.h"
 //#include "duk_config.h"
 
-int initialize_interface(std::string dir);
-
+int initialise_interface(std::string dir);
+int deinitialise_interface();
 
 
 #endif

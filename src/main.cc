@@ -15,6 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#include "main.h"
+
 #include <iostream>
 #include <fstream>
 
@@ -24,11 +26,12 @@
 #include "format.h"
 #include "spdlog/spdlog.h"
 
-#include "main.h"
+
 #include "interface.h"
 #include "generate.h"
 #include "player.h"
 #include "colors.h"
+#include "portability.h"
 
 #define RL_VERSION "1.0.0"
 
@@ -107,31 +110,31 @@ std::shared_ptr<spd::logger> init_logger()
     sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
     sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>("rl.log", 1048576 * 3, 3));
     auto rl_log = std::make_shared<spd::logger>("rl_logger", begin(sinks), end(sinks));
+	auto file_log = std::make_shared<spd::logger>("rl_file_logger", sinks[1]);
     spd::register_logger(rl_log);
     return rl_log;
 }
 
 int main(int argc, wchar_t** argv)
 {
-    int length = wai_getExecutablePath(NULL, 0, NULL);
-	char* path = (char*)malloc(length + 1);
-	wai_getExecutablePath(path, length, NULL);
-	dir = string(path);
-	dir = dir.substr(0, dir.find_last_of("."));
-	dir = dir.substr(0, dir.size()-2);
-    free(path);
+    get_exe_dir();
+	for (auto &v : list_files(get_exe_dir()))
+	{
+		if (v.isDirectory)
+			cout << "DIR:" << v.name << "\n";
+		else
+			cout << "FILE:" << v.name << "\n";
+	}
     auto logger = init_logger();
     spd::set_pattern("(%l) [%H:%M:%S %d/%m/%C] %v");
     logger->info("Rl v{}", RL_VERSION);
-    if(initialize_interface(dir) == -1)
+    if(initialise_interface(get_exe_dir()) == -1)
 	{
 		logger->error("Failed to read game data files.");
         return -1;
 	}
-	//register_rooms();
-	//read_rooms("data/surface/rooms.txt");
     terminal_open();
-	terminal_set(fmt::format("font: {}, size=8x8;", dir+ "/terminal_8x8.png").c_str());
+	terminal_set(fmt::format("font: {}, size=8x8;", get_exe_dir() + "/terminal_8x8.png").c_str());
 	terminal_refresh();
     //DrawMenu();
     vector<tile> town = generate_surface();
@@ -142,6 +145,7 @@ int main(int argc, wchar_t** argv)
         movePlayer(Player);
         terminal_refresh();
     }
+    deinitialise_interface();
     return 0;
 }
 

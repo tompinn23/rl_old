@@ -8,10 +8,115 @@
 #include "whereami.h"
 #include "spdlog/spdlog.h"
 
+#include "portability.h"
+
 #define _CRT_SECURE_NO_WARNINGS 1
 using namespace std;
 
 shared_ptr<spdlog::logger> rl_logger;
+
+char *PyTraceback_AsString(PyObject *exc_tb)
+{
+	char *errMsg = NULL; /* holds a local error message */
+	char *result = NULL; /* a valid, allocated result. */
+	PyObject *modStringIO = NULL;
+	PyObject *modTB = NULL;
+	PyObject *obFuncStringIO = NULL;
+	PyObject *obStringIO = NULL;
+	PyObject *obFuncTB = NULL;
+	PyObject *argsTB = NULL;
+	PyObject *obResult = NULL;
+
+	/* Import the modules we need - cStringIO and traceback */
+	modStringIO = PyImport_ImportModule("cStringIO");
+	if (modStringIO==NULL)
+	{
+		rl_logger->error("cant import cStringIO");
+		return NULL;
+	}
+	modTB = PyImport_ImportModule("traceback");
+	if (modTB==NULL)
+	{
+		rl_logger->error("cant import traceback");
+		return NULL;
+	}
+	/* Construct a cStringIO object */
+	obFuncStringIO = PyObject_GetAttrString(modStringIO, "StringIO");
+	if (obFuncStringIO==NULL)
+	{
+		rl_logger->error("cant find cStringIO.StringIO");
+		return NULL;
+	}
+	obStringIO = PyObject_CallObject(obFuncStringIO, NULL);
+	if (obStringIO==NULL)
+	{
+		rl_logger->error("cStringIO.StringIO() failed");
+		return NULL;
+	}
+	/* Get the traceback.print_exception function, and call it. */
+	obFuncTB = PyObject_GetAttrString(modTB, "print_tb");
+	if (obFuncTB==NULL)
+	{
+		rl_logger->error("cant find traceback.print_tb");
+		return NULL;
+	}
+	argsTB = Py_BuildValue("OOO", 
+			exc_tb  ? exc_tb  : Py_None,
+			Py_None, 
+			obStringIO);
+	if (argsTB==NULL)
+	{
+		rl_logger->error("cant make print_tb arguments");
+		return NULL;
+	}
+	obResult = PyObject_CallObject(obFuncTB, argsTB);
+	if (obResult==NULL) 
+	{
+		rl_logger->error("traceback.print_tb() failed");
+	}
+	/* Now call the getvalue() method in the StringIO instance */
+	Py_DECREF(obFuncStringIO);
+	obFuncStringIO = PyObject_GetAttrString(obStringIO, "getvalue");
+	if (obFuncStringIO==NULL)
+	{
+		rl_logger->error("cant find getvalue function");
+		return NULL;
+	}
+	Py_DECREF(obResult);
+	obResult = PyObject_CallObject(obFuncStringIO, NULL);
+	if (obResult==NULL) 
+	{
+		rl_logger->error("getvalue() failed.");
+		return NULL;				
+	}
+	/* And it should be a string all ready to go - duplicate it. */
+	if (!PyUnicode_Check(obResult))
+	{		
+		rl_logger->error("getvalue() did not return a string");
+		return NULL;
+	}
+	{ // a temp scope so I can use temp locals.
+	PyObject *temp = PyUnicode_AsASCIIString(obResult);
+	char* tempResult = PyBytes_AsString(temp);
+	result = (char *)PyMem_Malloc(strlen(tempResult)+1);
+	if (result==NULL)
+	{
+		rl_logger->error("memory error duplicating the traceback string");
+		return NULL;
+	}
+	strcpy(result, tempResult);
+	} // end of temp scope.
+	Py_XDECREF(modStringIO);
+	Py_XDECREF(modTB);
+	Py_XDECREF(obFuncStringIO);
+	Py_XDECREF(obStringIO);
+	Py_XDECREF(obFuncTB);
+	Py_XDECREF(argsTB);
+	Py_XDECREF(obResult);
+	return result;
+}
+
+
 
 static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 {
@@ -55,13 +160,16 @@ static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 		}
 	}
 	else
+	{
+		rl_logger->error("Room plan was missing from declaration");
 		return PyErr_Format(PyExc_KeyError, "%s", "Room plan was missing from declaration");
-	
+	}
 	Py_RETURN_NONE;
 }
 
 static PyMethodDef rl_methods[] = {
-	{"decl_room", rl_room_declaration, METH_VARARGS, "Declare a room prototype."}
+	{"decl_room", (PyCFunction)rl_room_declaration, METH_VARARGS, "Declare a room prototype."},
+	{NULL, NULL, 0, NULL}
 };
 
 static struct PyModuleDef rl_module = {
@@ -69,7 +177,11 @@ static struct PyModuleDef rl_module = {
     "rl",
 	NULL,
 	-1,
-	rl_methods
+	rl_methods,
+	NULL,
+	NULL,
+	NULL,
+	NULL
 };
 
 PyMODINIT_FUNC PyInit_rl()
@@ -77,45 +189,17 @@ PyMODINIT_FUNC PyInit_rl()
 	return PyModule_Create(&rl_module);
 }
 
-/* 
-int register_rooms()
-{
-	PyObject *pName, *pModule, *pDict, *pFunc;
-	PyObject *pArgs, *pValue;
-	int i;
-	
-	PyImport_AppendInittab("rl", PyInit_rl);
-	Py_Initialize();
-	PyObject *sys = PyImport_ImportModule("sys");
-	PyObject *path = PyObject_GetAttrString(sys, "path");
-	PyList_Append(path, PyUnicode_FromString("."));
-	PyList_Append(path, PyUnicode_FromString("C:"));
-
-	PyImport_ImportModule("rl");
-	pName = PyUnicode_DecodeFSDefault("C:/data/surface/rooms");
-	std::cout << PyUnicode_AsASCIIString(pName);
-	pModule = PyImport_ImportModule("data/surface/rooms");
-	if (pModule == NULL)
-		return -1;
-	Py_DECREF(pName);
-	Py_DECREF(pModule);
-	return 0;
-}
-*/
-
-int initialize_interface(string dir)
+int initialise_interface(string dir)
 {
 	rl_logger = spdlog::get("rl_logger");
 	PyImport_AppendInittab("rl", PyInit_rl);
+	rl_logger->info("Initialising Python");
 	Py_Initialize();
-	PyRun_SimpleString("from rl import *");
-	string libPath = "/lib/game/surface/rooms.py";
-	string file = dir + libPath;
-	FILE *fd = fopen(file.c_str(), "r");
-	if(fd == NULL)
-	{
-		std::cerr << "Could not find file" << "\n";
-		return -1;
-	}
-	return PyRun_SimpleFileEx(fd, file.c_str(), 1);
+	//PyImport_ImportModule("rl");
+	return PyRun_SimpleString("import rl");
+}
+
+int deinitialise_interface()
+{
+	return Py_FinalizeEx();
 }
