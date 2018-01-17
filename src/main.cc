@@ -91,7 +91,6 @@ void movePlayer(player &Player)
             Player.move_player(0,1);
         else if(k == TK_D)
             Player.move_player(1,0);
-		
     }
 }
 
@@ -115,7 +114,7 @@ std::shared_ptr<spd::logger> init_logger()
     return rl_log;
 }
 
-int main(int argc, wchar_t** argv)
+int main(int argc,  char** argv)
 {
     get_exe_dir();
 	for (auto &v : list_files(get_exe_dir()))

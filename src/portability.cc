@@ -1,13 +1,15 @@
 #include "portability.h"
 
 #include <algorithm>
+#include <iostream>
 
 #include "whereami.c"
 
-#if defined(WIN32) && !defined(UNIX)
+#if defined(WIN32) && !defined(__linux__)
 #include <windows.h>
-#elif defined(UNIX) && !defined(WIN32)
-#include <sys/type.h>
+#elif defined(__linux__) && !defined(WIN32)
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #endif
 using namespace std;
@@ -31,15 +33,15 @@ const string get_exe_dir()
 
 const string get_path(string path)
 {
-#if defined(WIN32) && !defined(UNIX)
+#if defined(WIN32) && !defined(__linux__)
     std::replace(path.begin(), path.end(), '/', '\\');
-#elif defined(UNIX) && !defined(WIN32)
+#elif defined(__linux__) && !defined(WIN32)
     std::replace(path.begin(), path.end(), '\\', '/');
 #endif
     return path;
 }
 
-#if defined(WIN32) && !defined(UNIX)
+#if defined(WIN32) && !defined(__linux__)
 
 std::vector<rl_file> list_files(std::string dir)
 {
@@ -67,16 +69,23 @@ std::vector<rl_file> list_files(std::string dir)
 	return files;
 }
 
-#elif defined(UNIX) && !defined(WIN32)
+#elif defined(__linux__) && !defined(WIN32)
 
-std::vector<std::string> list_files(std::string dir)
+std::vector<rl_file> list_files(std::string dir)
 {
-    vector<string> files;
+    vector<rl_file> files;
     DIR* dirp = opendir(dir.c_str());
     struct dirent* dp;
-    while((dp == readdir(dirp) != NULL)
+    while((dp = readdir(dirp)) != NULL)
     {
-        files.push_back(dp->d_name);
+		struct stat sb;
+		rl_file file;
+		file.name = string(dp->d_name);
+		if(stat(dp->d_name, &sb) == 0 && S_ISDIR(sb.st_mode))
+			file.isDirectory = true;
+		else
+			file.isDirectory = false;
+        files.push_back(file);
     }
     closedir(dirp);
 	return files;
