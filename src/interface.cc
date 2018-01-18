@@ -110,7 +110,7 @@ int initialise_interface(string &dir)
 	//PyImport_ImportModule("rl");
 	return PyRun_SimpleString("import rl");
 }
-\\\
+
 int deinitialise_interface()
 {
 	rl_logger->info("Deinitialising Python");
