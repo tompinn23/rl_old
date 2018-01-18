@@ -128,7 +128,8 @@ int main(int argc,  char** argv)
     add_handlers();
     spd::set_pattern("(%l) [%H:%M:%S %d/%m/%C] %v");
     logger->info("Rl v{}", RL_VERSION);
-    if(initialise_interface(get_exe_dir()) == -1)
+    string exe_dir = get_exe_dir();
+    if(initialise_interface(exe_dir) == -1)
 	{
 		logger->error("Failed to read game data files.");
         return -1;

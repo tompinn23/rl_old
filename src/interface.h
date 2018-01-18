@@ -40,7 +40,7 @@ typedef struct {
 //#include "duktape.h"
 //#include "duk_config.h"
 
-int initialise_interface(std::string dir);
+int initialise_interface(std::string &dir);
 int deinitialise_interface();
 
 

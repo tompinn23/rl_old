@@ -122,7 +122,7 @@ static void sigint_handler(int s)
 {
 	auto log = spdlog::get("rl_logger");	
 	deinitialise_interface();
-	terminal_close();
+	//terminal_close();
 	log->info("Exiting rl");
 	exit(1);
 }
