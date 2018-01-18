@@ -125,6 +125,7 @@ int main(int argc,  char** argv)
 			cout << "FILE:" << v.name << "\n";
 	}
     auto logger = init_logger();
+    add_handlers();
     spd::set_pattern("(%l) [%H:%M:%S %d/%m/%C] %v");
     logger->info("Rl v{}", RL_VERSION);
     if(initialise_interface(get_exe_dir()) == -1)

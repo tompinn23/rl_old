@@ -1,17 +1,41 @@
+/*
+    rl is a rougelike game.
+    Copyright (C) 2018 Tom Pinnock
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 #include "portability.h"
 
 #include <algorithm>
 #include <iostream>
 
 #include "whereami.c"
+#include "spdlog/spdlog.h"
+#include "BearLibTerminal.h"
 
 #if defined(WIN32) && !defined(__linux__)
 #include <windows.h>
 #elif defined(__linux__) && !defined(WIN32)
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <csignal>
+
 #endif
+
+#include "interface.h"
 using namespace std;
 
 string exe_dir;
@@ -69,6 +93,9 @@ std::vector<rl_file> list_files(std::string dir)
 	return files;
 }
 
+//TODO: Implement signal  on windows.
+
+
 #elif defined(__linux__) && !defined(WIN32)
 
 std::vector<rl_file> list_files(std::string dir)
@@ -90,4 +117,19 @@ std::vector<rl_file> list_files(std::string dir)
     closedir(dirp);
 	return files;
 }
+
+static void sigint_handler(int s)
+{
+	auto log = spdlog::get("rl_logger");	
+	deinitialise_interface();
+	terminal_close();
+	log->info("Exiting rl");
+	exit(1);
+}
+
+void add_handlers()
+{
+	signal(SIGINT, sigint_handler);
+}
+
 #endif

@@ -1,4 +1,20 @@
-// #include <Python.h>
+/*
+    rl is a rougelike game.
+    Copyright (C) 2018 Tom Pinnock
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
@@ -14,109 +30,6 @@
 using namespace std;
 
 shared_ptr<spdlog::logger> rl_logger;
-
-char *PyTraceback_AsString(PyObject *exc_tb)
-{
-	char *errMsg = NULL; /* holds a local error message */
-	char *result = NULL; /* a valid, allocated result. */
-	PyObject *modStringIO = NULL;
-	PyObject *modTB = NULL;
-	PyObject *obFuncStringIO = NULL;
-	PyObject *obStringIO = NULL;
-	PyObject *obFuncTB = NULL;
-	PyObject *argsTB = NULL;
-	PyObject *obResult = NULL;
-
-	/* Import the modules we need - cStringIO and traceback */
-	modStringIO = PyImport_ImportModule("cStringIO");
-	if (modStringIO==NULL)
-	{
-		rl_logger->error("cant import cStringIO");
-		return NULL;
-	}
-	modTB = PyImport_ImportModule("traceback");
-	if (modTB==NULL)
-	{
-		rl_logger->error("cant import traceback");
-		return NULL;
-	}
-	/* Construct a cStringIO object */
-	obFuncStringIO = PyObject_GetAttrString(modStringIO, "StringIO");
-	if (obFuncStringIO==NULL)
-	{
-		rl_logger->error("cant find cStringIO.StringIO");
-		return NULL;
-	}
-	obStringIO = PyObject_CallObject(obFuncStringIO, NULL);
-	if (obStringIO==NULL)
-	{
-		rl_logger->error("cStringIO.StringIO() failed");
-		return NULL;
-	}
-	/* Get the traceback.print_exception function, and call it. */
-	obFuncTB = PyObject_GetAttrString(modTB, "print_tb");
-	if (obFuncTB==NULL)
-	{
-		rl_logger->error("cant find traceback.print_tb");
-		return NULL;
-	}
-	argsTB = Py_BuildValue("OOO", 
-			exc_tb  ? exc_tb  : Py_None,
-			Py_None, 
-			obStringIO);
-	if (argsTB==NULL)
-	{
-		rl_logger->error("cant make print_tb arguments");
-		return NULL;
-	}
-	obResult = PyObject_CallObject(obFuncTB, argsTB);
-	if (obResult==NULL) 
-	{
-		rl_logger->error("traceback.print_tb() failed");
-	}
-	/* Now call the getvalue() method in the StringIO instance */
-	Py_DECREF(obFuncStringIO);
-	obFuncStringIO = PyObject_GetAttrString(obStringIO, "getvalue");
-	if (obFuncStringIO==NULL)
-	{
-		rl_logger->error("cant find getvalue function");
-		return NULL;
-	}
-	Py_DECREF(obResult);
-	obResult = PyObject_CallObject(obFuncStringIO, NULL);
-	if (obResult==NULL) 
-	{
-		rl_logger->error("getvalue() failed.");
-		return NULL;				
-	}
-	/* And it should be a string all ready to go - duplicate it. */
-	if (!PyUnicode_Check(obResult))
-	{		
-		rl_logger->error("getvalue() did not return a string");
-		return NULL;
-	}
-	{ // a temp scope so I can use temp locals.
-	PyObject *temp = PyUnicode_AsASCIIString(obResult);
-	char* tempResult = PyBytes_AsString(temp);
-	result = (char *)PyMem_Malloc(strlen(tempResult)+1);
-	if (result==NULL)
-	{
-		rl_logger->error("memory error duplicating the traceback string");
-		return NULL;
-	}
-	strcpy(result, tempResult);
-	} // end of temp scope.
-	Py_XDECREF(modStringIO);
-	Py_XDECREF(modTB);
-	Py_XDECREF(obFuncStringIO);
-	Py_XDECREF(obStringIO);
-	Py_XDECREF(obFuncTB);
-	Py_XDECREF(argsTB);
-	Py_XDECREF(obResult);
-	return result;
-}
-
-
 
 static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 {
@@ -139,7 +52,6 @@ static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 	PyObject* attrs = PyDict_GetItemString(room, "attrs");
 	if(attrs != NULL)
 	{
-		std::cout << "ATTRS" << "\n";
 		for(int i = 0; i < PyList_Size(attrs); i++)
 		{
 			PyObject* item = PyList_GetItem(attrs, i);
@@ -201,5 +113,6 @@ int initialise_interface(string dir)
 
 int deinitialise_interface()
 {
+	rl_logger->info("Deinitialising Python");
 	return Py_FinalizeEx();
 }
