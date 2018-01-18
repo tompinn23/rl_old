@@ -1,0 +1,5 @@
+_version=3.1.0
+service=github
+repo=tompinn23/rl
+github.token=d5025e51c2ec0044b81a182ba69e7b191e23cbc2
+inject-issue=true

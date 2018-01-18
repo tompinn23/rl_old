@@ -95,6 +95,18 @@ std::vector<rl_file> list_files(std::string dir)
 
 //TODO: Implement signal  on windows.
 
+static BOOL WINAPI ctrlhandler(DWORD ctrlType) {
+	auto log = spdlog::get("rl_logger");
+	deinitialise_interface();
+	log->info("Exiting rl");
+	return TRUE;
+}
+
+void add_handlers()
+{
+	//SetConsoleCtrlHandler((PHANDLER_ROUTINE)ctrlhandler, TRUE);
+	//NOT WORKING!!!
+}
 
 #elif defined(__linux__) && !defined(WIN32)
 

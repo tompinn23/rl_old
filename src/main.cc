@@ -57,7 +57,7 @@ void drawMap(vector<tile> &map, player Player)
                 case EMPTY:
                     terminal_put(i, j, ' ');
                     break;
-                case ROAD:
+                case FLOOR:
                     terminal_put(i, j, '.');
                     break;
                 case WALL:

@@ -33,6 +33,7 @@ shared_ptr<spdlog::logger> rl_logger;
 
 static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 {
+	room tempRoom;
 	PyObject* room;
 	if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &room))
 		return NULL;
@@ -42,7 +43,7 @@ static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 		PyObject* ascii_string = PyUnicode_AsASCIIString(pyName);
 		char* name = PyBytes_AsString(ascii_string);
 		string s = std::string(name);
-		cout << s << "\n";
+		tempRoom.name = s;
 	}
 	else
 	{
@@ -50,6 +51,8 @@ static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 		return PyErr_Format(PyExc_KeyError, "%s", "Room name was missing from declaration");
 	}
 	PyObject* attrs = PyDict_GetItemString(room, "attrs");
+	vector<string> vAttrs;
+	tempRoom.attrs = vAttrs;
 	if(attrs != NULL)
 	{
 		for(int i = 0; i < PyList_Size(attrs); i++)
@@ -57,10 +60,12 @@ static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 			PyObject* item = PyList_GetItem(attrs, i);
 			PyObject* ascii_str = PyUnicode_AsASCIIString(item);
 			char* sItem = PyBytes_AsString(ascii_str);
-			std::cout << sItem << "\n";
+			vAttrs.push_back(string(sItem));
 		}
+		tempRoom.attrs = vAttrs;
 	}
 	PyObject* plan = PyDict_GetItemString(room, "plan");
+	vector<tile> vPlan;
 	if(plan != NULL)
 	{
 		for(int i = 0; i < PyList_Size(plan); i++)
@@ -68,14 +73,30 @@ static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 			PyObject* item = PyList_GetItem(plan, i);
 			PyObject* ascii_str = PyUnicode_AsASCIIString(item);
 			char* sItem = PyBytes_AsString(ascii_str);
-			std::cout << sItem << "\n";
+			int j = 0;
+			for (auto& c : string(sItem))
+			{
+				if (c == '#')
+					place_tile(i, j, WALL, vPlan);
+				else if (c == '.')
+					place_tile(i, j, FLOOR, vPlan);
+				else if (c == '~')
+					place_tile(i, j, WATER, vPlan);
+				else if (c == '=')
+					place_tile(i, j, DOOR, vPlan);
+				else if (c == ' ')
+					place_tile(i, j, EMPTY, vPlan);
+				j++;
+			}
 		}
+		tempRoom.plan = vPlan;
 	}
 	else
 	{
 		rl_logger->error("Room plan was missing from declaration");
 		return PyErr_Format(PyExc_KeyError, "%s", "Room plan was missing from declaration");
 	}
+	add_to_registry(tempRoom);
 	Py_RETURN_NONE;
 }
 

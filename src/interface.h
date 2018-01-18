@@ -43,5 +43,5 @@ typedef struct {
 int initialise_interface(std::string &dir);
 int deinitialise_interface();
 
-
+void add_to_registry(room room);
 #endif
