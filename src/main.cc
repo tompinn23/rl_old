@@ -41,7 +41,7 @@ string dir;
 static bool closed_flag = false;
 
 
-void drawMap(vector<tile> map, player Player)
+void drawMap(vector<tile> &map, player Player)
 {
     //printf("here?");
     for(int i = 0; i < 60; i++)

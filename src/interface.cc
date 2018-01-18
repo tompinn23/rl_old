@@ -101,7 +101,7 @@ PyMODINIT_FUNC PyInit_rl()
 	return PyModule_Create(&rl_module);
 }
 
-int initialise_interface(string dir)
+int initialise_interface(string &dir)
 {
 	rl_logger = spdlog::get("rl_logger");
 	PyImport_AppendInittab("rl", PyInit_rl);
@@ -110,7 +110,7 @@ int initialise_interface(string dir)
 	//PyImport_ImportModule("rl");
 	return PyRun_SimpleString("import rl");
 }
-
+\\\
 int deinitialise_interface()
 {
 	rl_logger->info("Deinitialising Python");

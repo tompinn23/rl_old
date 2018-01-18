@@ -20,7 +20,7 @@
 #include "player.h"
 
 
-player::player(int x, int y, std::string name)
+player::player(int x, int y, std::string &name)
 : p_x(x), p_y(y), name(name)
 {
 
