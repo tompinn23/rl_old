@@ -16,15 +16,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <iostream>
-#include <cstdlib>
-#include <cstdio>
-
+#include <Python.h>
 
 #include "interface.h"
-#include "whereami.h"
 #include "spdlog/spdlog.h"
 
 #include "portability.h"
+#include "registry.h"
 
 #define _CRT_SECURE_NO_WARNINGS 1
 using namespace std;
@@ -135,5 +133,6 @@ int initialise_interface(string &dir)
 int deinitialise_interface()
 {
 	rl_logger->info("Deinitialising Python");
-	return Py_FinalizeEx();
+	Py_Finalize();
+	return 0;
 }

@@ -20,20 +20,11 @@
 
 
 
-#include <Python.h>
 #include <string>
 #include <vector>
 
 #include "generate.h"
 //Python Module
-
-typedef struct {
-    std::string name;
-    std::vector<std::string> attrs;
-    std::vector<tile> plan;
-} room;
-
-
 
 //int register_rooms();
 
@@ -43,5 +34,5 @@ typedef struct {
 int initialise_interface(std::string &dir);
 int deinitialise_interface();
 
-void add_to_registry(room room);
+
 #endif

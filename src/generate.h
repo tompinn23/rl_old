@@ -27,7 +27,7 @@
 #define WATER 3
 #define DOOR 4
 
-std::vector<room> rooms;
+
 
 typedef unsigned char tile;
 

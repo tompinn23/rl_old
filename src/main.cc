@@ -117,13 +117,6 @@ std::shared_ptr<spd::logger> init_logger()
 int main(int argc,  char** argv)
 {
     get_exe_dir();
-	for (auto &v : list_files(get_exe_dir()))
-	{
-		if (v.isDirectory)
-			cout << "DIR:" << v.name << "\n";
-		else
-			cout << "FILE:" << v.name << "\n";
-	}
     auto logger = init_logger();
     add_handlers();
     spd::set_pattern("(%l) [%H:%M:%S %d/%m/%C] %v");
