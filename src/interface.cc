@@ -94,7 +94,10 @@ static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 		rl_logger->error("Room plan was missing from declaration");
 		return PyErr_Format(PyExc_KeyError, "%s", "Room plan was missing from declaration");
 	}
-	add_to_registry(tempRoom);
+	if (std::find(tempRoom.attrs.begin(), tempRoom.attrs.end(), "surface") != tempRoom.attrs.end())
+		add_to_registry(tempRoom, true);
+	else
+		add_to_registry(tempRoom, false);
 	Py_RETURN_NONE;
 }
 

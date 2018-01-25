@@ -14,6 +14,6 @@ typedef struct {
 
 
 
-void add_to_registry(room room);
+void add_to_registry(room room, bool surface);
 
 #endif // !REGISTRY_H
