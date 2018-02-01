@@ -1,0 +1,17 @@
+#ifndef RL_CONFIG_H
+#define RL_CONFIG_H
+
+#ifndef WIN32
+#cmakedefine WIN32
+#endif
+
+#ifndef UNIX
+#cmakedefine UNIX
+#endif
+
+#cmakedefine HAVE_FS_H
+#cmakedefine HAVE_FS_EXP_H
+#cmakedefine FS_EXP
+#cmakedefine FS_STD
+
+#endif //RL_CONFIG_H

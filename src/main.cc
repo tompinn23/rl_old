@@ -32,6 +32,7 @@
 #include "player.h"
 #include "colors.h"
 #include "portability.h"
+#include "fs.h"
 
 #define RL_VERSION "1.0.0"
 
