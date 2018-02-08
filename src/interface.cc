@@ -139,3 +139,15 @@ int deinitialise_interface()
 	Py_Finalize();
 	return 0;
 }
+
+int run_file(fs::path file)
+{
+	FILE* file_ptr = fopen(file.string().c_str(), "r");
+	if(file_ptr == NULL)
+	{
+		rl_logger->error("Fatal error couldn't open file: {}", file.string());
+		return -1;
+	}
+
+	return PyRun_SimpleFileEx(file_ptr, file.string().c_str(), 1);
+}

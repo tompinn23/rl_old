@@ -21,14 +21,16 @@
 #include <vector>
 #include <string>
 
+#include "fs.h"
+
 typedef struct {
 	bool isDirectory;
 	std::string name;
 } rl_file;
 
-const std::string get_exe_dir();
+fs::path get_exe_dir();
 
-const std::string get_path(std::string path);
+//const std::string get_path(std::string path);
 
 std::vector<rl_file> list_files(std::string dir);
 

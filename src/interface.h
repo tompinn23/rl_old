@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "generate.h"
+#include "fs.h"
 //Python Module
 
 //int register_rooms();
@@ -34,5 +35,6 @@
 int initialise_interface(std::string &dir);
 int deinitialise_interface();
 
+int run_file(fs::path path);
 
 #endif

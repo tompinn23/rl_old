@@ -122,15 +122,28 @@ int main(int argc,  char** argv)
     add_handlers();
     spd::set_pattern("(%l) [%H:%M:%S %d/%m/%C] %v");
     logger->info("Rl v{}", RL_VERSION);
-    string exe_dir = get_exe_dir();
-    if(initialise_interface(exe_dir) == -1)
-	{
+    fs::path exe_dir = get_exe_dir();
+    for(auto const &f : fs::directory_iterator(exe_dir / "lib"))
+    {
+      std::string filename = f.path().filename().string();
+      bool isDir = fs::is_directory(f.path());
+      if(isDir)
+        logger->info("DIR: {}", filename);
+      else
+      {
+        logger->info("FILE: {}", filename);
+        if(f.path().extension() == ".py")
+          run_file(f);
+      }
+    }
+    if(initialise_interface(exe_dir.string()) == -1)
+	  {
 		logger->error("Failed to read game data files.");
         return -1;
-	}
+	  }
     terminal_open();
-	terminal_set(fmt::format("font: {}, size=8x8;", get_exe_dir() + "/terminal_8x8.png").c_str());
-	terminal_refresh();
+	  terminal_set(fmt::format("font: {}, size=8x8;", (get_exe_dir() / "terminal_8x8.png").string()).c_str());
+	  terminal_refresh();
     //DrawMenu();
     vector<tile> town = generate_surface();
     player Player = player(1, 1, "tom");
@@ -143,4 +156,3 @@ int main(int argc,  char** argv)
     deinitialise_interface();
     return 0;
 }
-

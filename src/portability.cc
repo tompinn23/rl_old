@@ -40,7 +40,7 @@ using namespace std;
 
 string exe_dir;
 
-const string get_exe_dir()
+fs::path get_exe_dir()
 {
     if(!exe_dir.empty())
         return exe_dir;
@@ -52,7 +52,7 @@ const string get_exe_dir()
 	dir = dir.substr(0, dir.size()-2);
     free(path);
     exe_dir = dir;
-    return exe_dir;
+    return fs::path(exe_dir);
 }
 
 const string get_path(string path)
@@ -132,7 +132,7 @@ std::vector<rl_file> list_files(std::string dir)
 
 static void sigint_handler(int s)
 {
-	auto log = spdlog::get("rl_logger");	
+	auto log = spdlog::get("rl_logger");
 	deinitialise_interface();
 	//terminal_close();
 	log->info("Exiting rl");
