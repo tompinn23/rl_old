@@ -132,8 +132,8 @@ int main(int argc,  char** argv)
       else
       {
         logger->info("FILE: {}", filename);
-        if(f.path().extension() == ".py")
-          run_file(f);
+        //if(f.path().extension() == ".py")
+        // run_file(f);
       }
     }
     if(initialise_interface(exe_dir.string()) == -1)
@@ -141,6 +141,7 @@ int main(int argc,  char** argv)
 		logger->error("Failed to read game data files.");
         return -1;
 	  }
+	return 0;
     terminal_open();
 	  terminal_set(fmt::format("font: {}, size=8x8;", (get_exe_dir() / "terminal_8x8.png").string()).c_str());
 	  terminal_refresh();
@@ -153,6 +154,6 @@ int main(int argc,  char** argv)
         movePlayer(Player);
         terminal_refresh();
     }
-    deinitialise_interface();
+    //deinitialise_interface();
     return 0;
 }

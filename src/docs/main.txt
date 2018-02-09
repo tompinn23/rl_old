@@ -1,4 +1,0 @@
-/** \file main.cc
-    The main 'driver' source file.
-*/
-

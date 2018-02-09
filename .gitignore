@@ -2,3 +2,6 @@ build/*
 !build/.gitkeep
 .vscode/
 .vs/
+
+docs/
+src/lua-*

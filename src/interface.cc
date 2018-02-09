@@ -16,7 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <iostream>
-#include <Python.h>
+#include "sol.hpp"
+//#include <Python.h>
 
 #include "interface.h"
 #include "spdlog/spdlog.h"
@@ -28,8 +29,7 @@
 using namespace std;
 
 shared_ptr<spdlog::logger> rl_logger;
-
-static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
+/* static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
 {
 	room tempRoom;
 	PyObject* room;
@@ -121,33 +121,50 @@ static struct PyModuleDef rl_module = {
 PyMODINIT_FUNC PyInit_rl()
 {
 	return PyModule_Create(&rl_module);
+} */
+
+sol::protected_function_result err_handler(lua_State* L, sol::protected_function_result pfr)
+{
+	sol::error err = pfr;
+	rl_logger->error(err.what());
+	return pfr;
+}
+
+bool c_decl_room(sol::table room_table)
+{
+	sol::optional<string> name = room_table["name"];
+	if(name)
+		rl_logger->info(name.value());
+	else
+		rl_logger->error("Name for room doesnt exist");
+	return true;
 }
 
 int initialise_interface(string &dir)
 {
 	rl_logger = spdlog::get("rl_logger");
-	PyImport_AppendInittab("rl", PyInit_rl);
-	rl_logger->info("Initialising Python");
-	Py_Initialize();
-	//PyImport_ImportModule("rl");
-	return PyRun_SimpleString("import rl");
-}
-
-int deinitialise_interface()
-{
-	rl_logger->info("Deinitialising Python");
-	Py_Finalize();
+	sol::state lua;
+	lua.open_libraries(sol::lib::base);
+	lua.set("decl_room", c_decl_room);
+	lua.safe_script_file("rooms.lua", err_handler);
 	return 0;
 }
 
-int run_file(fs::path file)
-{
-	FILE* file_ptr = fopen(file.string().c_str(), "r");
-	if(file_ptr == NULL)
-	{
-		rl_logger->error("Fatal error couldn't open file: {}", file.string());
-		return -1;
-	}
+// int deinitialise_interface()
+// {
+	// rl_logger->info("Deinitialising Python");
+	// Py_Finalize();
+	// return 0;
+// }
 
-	return PyRun_SimpleFileEx(file_ptr, file.string().c_str(), 1);
-}
+// int run_file(fs::path file)
+// {
+	// FILE* file_ptr = fopen(file.string().c_str(), "r");
+	// if(file_ptr == NULL)
+	// {
+		// rl_logger->error("Fatal error couldn't open file: {}", file.string());
+		// return -1;
+	// }
+
+	// return PyRun_SimpleFileEx(file_ptr, file.string().c_str(), 1);
+// }
