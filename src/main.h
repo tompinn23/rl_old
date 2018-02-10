@@ -20,4 +20,10 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 
 #include <string>
+
+namespace rl
+{
+	bool debugEnabled = false;
+	
+}
 #endif

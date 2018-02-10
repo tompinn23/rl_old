@@ -28,127 +28,73 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 using namespace std;
 
-shared_ptr<spdlog::logger> rl_logger;
-/* static PyObject* rl_room_declaration(PyObject* self, PyObject* args)
+namespace rl
 {
-	room tempRoom;
-	PyObject* room;
-	if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &room))
-		return NULL;
-	PyObject* pyName = PyDict_GetItemString(room, "name");
-	if(pyName != NULL)
-	{
-		PyObject* ascii_string = PyUnicode_AsASCIIString(pyName);
-		char* name = PyBytes_AsString(ascii_string);
-		string s = std::string(name);
-		tempRoom.name = s;
-	}
-	else
-	{
-		rl_logger->error("Room Name was missing");
-		return PyErr_Format(PyExc_KeyError, "%s", "Room name was missing from declaration");
-	}
-	PyObject* attrs = PyDict_GetItemString(room, "attrs");
-	vector<string> vAttrs;
-	tempRoom.attrs = vAttrs;
-	if(attrs != NULL)
-	{
-		for(int i = 0; i < PyList_Size(attrs); i++)
-		{
-			PyObject* item = PyList_GetItem(attrs, i);
-			PyObject* ascii_str = PyUnicode_AsASCIIString(item);
-			char* sItem = PyBytes_AsString(ascii_str);
-			vAttrs.push_back(string(sItem));
-		}
-		tempRoom.attrs = vAttrs;
-	}
-	PyObject* plan = PyDict_GetItemString(room, "plan");
-	vector<tile> vPlan;
-	if(plan != NULL)
-	{
-		for(int i = 0; i < PyList_Size(plan); i++)
-		{
-			PyObject* item = PyList_GetItem(plan, i);
-			PyObject* ascii_str = PyUnicode_AsASCIIString(item);
-			char* sItem = PyBytes_AsString(ascii_str);
-			int j = 0;
-			for (auto& c : string(sItem))
-			{
-				if (c == '#')
-					place_tile(i, j, WALL, vPlan);
-				else if (c == '.')
-					place_tile(i, j, FLOOR, vPlan);
-				else if (c == '~')
-					place_tile(i, j, WATER, vPlan);
-				else if (c == '=')
-					place_tile(i, j, DOOR, vPlan);
-				else if (c == ' ')
-					place_tile(i, j, EMPTY, vPlan);
-				j++;
-			}
-		}
-		tempRoom.plan = vPlan;
-	}
-	else
-	{
-		rl_logger->error("Room plan was missing from declaration");
-		return PyErr_Format(PyExc_KeyError, "%s", "Room plan was missing from declaration");
-	}
-	if (std::find(tempRoom.attrs.begin(), tempRoom.attrs.end(), "surface") != tempRoom.attrs.end())
-		add_to_registry(tempRoom, true);
-	else
-		add_to_registry(tempRoom, false);
-	Py_RETURN_NONE;
-}
-
-static PyMethodDef rl_methods[] = {
-	{"decl_room", (PyCFunction)rl_room_declaration, METH_VARARGS, "Declare a room prototype."},
-	{NULL, NULL, 0, NULL}
-};
-
-static struct PyModuleDef rl_module = {
-	PyModuleDef_HEAD_INIT,
-    "rl",
-	NULL,
-	-1,
-	rl_methods,
-	NULL,
-	NULL,
-	NULL,
-	NULL
-};
-
-PyMODINIT_FUNC PyInit_rl()
-{
-	return PyModule_Create(&rl_module);
-} */
-
-sol::protected_function_result err_handler(lua_State* L, sol::protected_function_result pfr)
-{
-	sol::error err = pfr;
-	rl_logger->error(err.what());
-	return pfr;
-}
-
-bool c_decl_room(sol::table room_table)
-{
-	sol::optional<string> name = room_table["name"];
-	if(name)
-		rl_logger->info(name.value());
-	else
-		rl_logger->error("Name for room doesnt exist");
-	return true;
-}
-
-int initialise_interface(string &dir)
-{
-	rl_logger = spdlog::get("rl_logger");
+	shared_ptr<spdlog::logger> rl_logger;
 	sol::state lua;
-	lua.open_libraries(sol::lib::base);
-	lua.set("decl_room", c_decl_room);
-	lua.safe_script_file("rooms.lua", err_handler);
-	return 0;
-}
+	
+	sol::protected_function_result err_handler(lua_State* L, sol::protected_function_result pfr)
+	{
+		sol::error err = pfr;
+		rl_logger->error(err.what());
+		return pfr;
+	}
+
+	bool c_decl_room(sol::this_state s, sol::table room_table)
+	{
+
+		lua_State* L = s;
+		lua_Debug info;
+		lua_getstack(L, 1, &info);
+		lua_getinfo(L, "nSl", &info);
+		/*
+			'n': fills in the field name and namewhat;
+			'S': fills in the fields source, short_src, linedefined, lastlinedefined, and what;
+			'l': fills in the field currentline; 
+			short_src = filename;
+		*/
+		rl_logger->debug("Room declaration at {}:{}", info.short_src, info.currentline);
+		bool missing = false;
+		sol::optional<string> name = room_table["name"];
+		sol::optional<string> desc = room_table["desc"];
+		sol::optional<sol::table> attrs = room_table["attrs"];
+		sol::optional<sol::table> plan = room_table["plan"];
+		int count = room_table.size();
+		cout << count;
+		for(int i = 1; i <= count; ++i)
+			cout << room_table[i].get<string>() << "\n" << i << "\n";
+		if(name)
+			rl_logger->debug(name.value());
+		else
+		{
+			rl_logger->error("Room Name does not exist for declaration at {}:{}", info.short_src, info.currentline);
+			missing = true;
+		}
+		if(desc)
+		{
+			rl_logger->debug(desc.value());
+		}
+		else
+		{
+			rl_logger->error("Room Description does not exist for declaration at {}:{}", info.short_src, info.currentline);
+			missing = true;
+		}
+		if(attrs)
+		{
+			
+		}
+		
+		return true;
+	}
+
+	int initialise_interface(string &dir)
+	{
+		rl_logger = spdlog::get("rl_logger");
+		lua.open_libraries(sol::lib::base);
+		rl_logger->debug("Initiating Lua State.");
+		lua.set("decl_room", c_decl_room);
+		return 0;
+	}
 
 // int deinitialise_interface()
 // {
@@ -157,14 +103,9 @@ int initialise_interface(string &dir)
 	// return 0;
 // }
 
-// int run_file(fs::path file)
-// {
-	// FILE* file_ptr = fopen(file.string().c_str(), "r");
-	// if(file_ptr == NULL)
-	// {
-		// rl_logger->error("Fatal error couldn't open file: {}", file.string());
-		// return -1;
-	// }
-
-	// return PyRun_SimpleFileEx(file_ptr, file.string().c_str(), 1);
-// }
+	int run_file(fs::path file)
+	{
+		rl_logger->debug("Opening file {}", file.string());
+		return lua.safe_script_file(file.string(), err_handler);
+	}
+}

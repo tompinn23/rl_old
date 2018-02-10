@@ -25,6 +25,7 @@
 #include "whereami.h"
 #include "format.h"
 #include "spdlog/spdlog.h"
+#include "args.hxx"
 
 
 #include "interface.h"
@@ -38,122 +39,150 @@
 
 using namespace std;
 namespace spd = spdlog;
-string dir;
-static bool closed_flag = false;
 
-
-void drawMap(vector<tile> &map, player Player)
+namespace rl
 {
-    //printf("here?");
-    for(int i = 0; i < 60; i++)
-    {
-        for(int j = 0; j < 40; j++)
-        {
-            int map_x, map_y;
-            tie(map_x, map_y) = Player.screen_transform(i, j);
-            //out << map_x << "," << map_y << "\n";
-            tile t = get_tile(map_x, map_y, map);
-            switch(t)
-            {
-                case EMPTY:
-                    terminal_put(i, j, ' ');
-                    break;
-                case FLOOR:
-                    terminal_put(i, j, '.');
-                    break;
-                case WALL:
-                    terminal_put(i, j, '#');
-                    break;
-                case WATER:
-                    terminal_color(LIGHT_BLUE);
-                    terminal_put(i, j, '~');
-                    terminal_color(WHITE);
-                    break;
-            }
-        }
-    }
-}
-
-void movePlayer(player &Player)
-{
-    if(terminal_has_input())
-    {
-        int k = terminal_read();
-		if(k == TK_CLOSE)
-        {
-			terminal_close();
-            closed_flag = true;
-        }
-        else if(k == TK_W)
-            Player.move_player(0,-1);
-        else if(k == TK_A)
-            Player.move_player(-1,0);
-        else if(k == TK_S)
-            Player.move_player(0,1);
-        else if(k == TK_D)
-            Player.move_player(1,0);
-    }
-}
+	static string dir;
+	static bool closed_flag = false;
 
 
-void DrawMenu()
-{
-    terminal_print(4, 4, "1) Start Game");
-    terminal_print(4, 5, "2) Settings");
-    terminal_print(4, 6, "3) Exit");
-    terminal_refresh();
-}
+	void drawMap(vector<tile> &map, player Player)
+	{
+		//printf("here?");
+		for(int i = 0; i < 60; i++)
+		{
+			for(int j = 0; j < 40; j++)
+			{
+				int map_x, map_y;
+				tie(map_x, map_y) = Player.screen_transform(i, j);
+				//out << map_x << "," << map_y << "\n";
+				tile t = get_tile(map_x, map_y, map);
+				switch(t)
+				{
+					case EMPTY:
+						terminal_put(i, j, ' ');
+						break;
+					case FLOOR:
+						terminal_put(i, j, '.');
+						break;
+					case WALL:
+						terminal_put(i, j, '#');
+						break;
+					case WATER:
+						terminal_color(LIGHT_BLUE);
+						terminal_put(i, j, '~');
+						terminal_color(WHITE);
+						break;
+				}
+			}
+		}
+	}
 
-std::shared_ptr<spd::logger> init_logger()
-{
-    std::vector<spdlog::sink_ptr> sinks;
-    sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
-    sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>("rl.log", 1048576 * 3, 3));
-    auto rl_log = std::make_shared<spd::logger>("rl_logger", begin(sinks), end(sinks));
-	auto file_log = std::make_shared<spd::logger>("rl_file_logger", sinks[1]);
-    spd::register_logger(rl_log);
-    return rl_log;
+	void movePlayer(player &Player)
+	{
+		if(terminal_has_input())
+		{
+			int k = terminal_read();
+			if(k == TK_CLOSE)
+			{
+				terminal_close();
+				closed_flag = true;
+			}
+			else if(k == TK_W)
+				Player.move_player(0,-1);
+			else if(k == TK_A)
+				Player.move_player(-1,0);
+			else if(k == TK_S)
+				Player.move_player(0,1);
+			else if(k == TK_D)
+				Player.move_player(1,0);
+		}
+	}
+
+
+	void DrawMenu()
+	{
+		terminal_print(4, 4, "1) Start Game");
+		terminal_print(4, 5, "2) Settings");
+		terminal_print(4, 6, "3) Exit");
+		terminal_refresh();
+	}
+
+	std::shared_ptr<spd::logger> init_logger()
+	{
+		std::vector<spdlog::sink_ptr> sinks;
+		sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
+		sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>("rl.log", 1048576 * 3, 3));
+		auto rl_log = std::make_shared<spd::logger>("rl_logger", begin(sinks), end(sinks));
+		auto file_log = std::make_shared<spd::logger>("rl_file_logger", sinks[1]);
+		spd::register_logger(rl_log);
+		return rl_log;
+	}
 }
 
 int main(int argc,  char** argv)
-{
-    get_exe_dir();
-    auto logger = init_logger();
-    add_handlers();
-    spd::set_pattern("(%l) [%H:%M:%S %d/%m/%C] %v");
-    logger->info("Rl v{}", RL_VERSION);
-    fs::path exe_dir = get_exe_dir();
-    for(auto const &f : fs::directory_iterator(exe_dir / "lib"))
-    {
-      std::string filename = f.path().filename().string();
-      bool isDir = fs::is_directory(f.path());
-      if(isDir)
-        logger->info("DIR: {}", filename);
-      else
-      {
-        logger->info("FILE: {}", filename);
-        //if(f.path().extension() == ".py")
-        // run_file(f);
-      }
-    }
-    if(initialise_interface(exe_dir.string()) == -1)
-	  {
-		logger->error("Failed to read game data files.");
-        return -1;
-	  }
-	return 0;
-    terminal_open();
-	  terminal_set(fmt::format("font: {}, size=8x8;", (get_exe_dir() / "terminal_8x8.png").string()).c_str());
-	  terminal_refresh();
-    //DrawMenu();
-    vector<tile> town = generate_surface();
-    player Player = player(1, 1, "tom");
-    while(true && !closed_flag)
-    {
-        drawMap(town, Player);
-        movePlayer(Player);
-        terminal_refresh();
-    }
-    //deinitialise_interface();
-    return 0;
-}
+	{
+		using namespace rl;
+		get_exe_dir();
+		auto logger = init_logger();
+		add_handlers();
+		spd::set_pattern("(%l) [%H:%M:%S %d/%m/%C] %v");
+		args::ArgumentParser parser("rl");
+		args::HelpFlag help(parser, "help", "Display this help menu", { 'h', "help"});
+		args::Flag debug(parser , "debug", "Enables debug messages", {'d', "debug"});
+		try
+		{
+        parser.ParseCLI(argc, argv);
+		}
+		catch (args::Help)
+		{
+			std::cout << parser;
+			return 0;
+		}
+		catch (args::ParseError e)
+		{
+			std::cerr << e.what() << std::endl;
+			std::cerr << parser;
+			return 1;
+		}	
+		if(debug)
+		{
+			spd::set_level(spd::level::debug);
+		}
+		logger->info("Rl v{}", RL_VERSION);
+		fs::path exe_dir = get_exe_dir();
+		for(auto const &f : fs::directory_iterator(exe_dir / "lib"))
+		{
+		  std::string filename = f.path().filename().string();
+		  bool isDir = fs::is_directory(f.path());
+		  if(isDir)
+			logger->info("DIR: {}", filename);
+		  else
+		  {
+			logger->info("FILE: {}", filename);
+			//if(f.path().extension() == ".py")
+			// run_file(f);
+		  }
+		}
+		if(initialise_interface(exe_dir.string()) == -1)
+		  {
+			logger->error("Failed to read game data files.");
+			return -1;
+		  }
+		run_file(get_exe_dir() / "lib/rooms.lua");
+		terminal_open();
+		terminal_set(fmt::format("font: {}, size=8x8;", (get_exe_dir() / "terminal_8x8.png").string()).c_str());
+		terminal_refresh();
+		//DrawMenu();
+		vector<tile> town = generate_surface();
+		player Player = player(1, 1, "tom");
+		while(true && !closed_flag)
+		{
+			drawMap(town, Player);
+			movePlayer(Player);
+			terminal_refresh();
+		}
+		//deinitialise_interface();
+		
+		return 0;
+	}

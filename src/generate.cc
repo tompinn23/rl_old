@@ -21,28 +21,29 @@
 #include "generate.h"
 
 using namespace std;
-
-bool place_tile(int x, int y, tile Tile, vector<tile>& map)
+namespace rl
 {
-	if (x < 0 || x > 255 || y < 0 || y > 255)
-		return false;
-    map[256 * y + x] = Tile;
-	return true;
-}
+	bool place_tile(int x, int y, tile Tile, vector<tile>& map)
+	{
+		if (x < 0 || x > 255 || y < 0 || y > 255)
+			return false;
+		map[256 * y + x] = Tile;
+		return true;
+	}
 
-tile get_tile(int x, int y, vector<tile> map)
-{
-	if (x < 0 || x > 255 || y < 0 || y > 255)
-		return WATER;
-	return map.at(256 * y + x);
-}
+	tile get_tile(int x, int y, vector<tile> map)
+	{
+		if (x < 0 || x > 255 || y < 0 || y > 255)
+			return WATER;
+		return map.at(256 * y + x);
+	}
 
-vector<tile> generate_surface()
-{
-    vector<tile> town = vector<tile>();
-    town.resize(65536, EMPTY);
-    place_tile(3, 4, WALL, town);
-    place_tile(3, 3, WALL, town);
-    return town;
+	vector<tile> generate_surface()
+	{
+		vector<tile> town = vector<tile>();
+		town.resize(65536, EMPTY);
+		place_tile(3, 4, WALL, town);
+		place_tile(3, 3, WALL, town);
+		return town;
+	}
 }
-

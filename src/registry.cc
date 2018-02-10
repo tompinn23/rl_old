@@ -1,10 +1,14 @@
 #include "registry.h"
-std::vector<room> rooms;
+
 
 
 using namespace std;
-
-void add_to_registry(room room, bool surface)
+namespace rl
 {
-	rooms.push_back(room);
+	static vector<rl_room> rooms;
+	
+	void add_to_registry(rl_room room, bool surface)
+	{
+		rooms.push_back(room);
+	}
 }

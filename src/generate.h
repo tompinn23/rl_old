@@ -28,13 +28,14 @@
 #define DOOR 4
 
 
+namespace rl 
+{
+	typedef unsigned char tile;
 
-typedef unsigned char tile;
-
-bool place_tile(int x, int y, tile Tile, std::vector<tile>& map);
-tile get_tile(int x, int y, std::vector<tile> map);
-std::vector<tile> generate_surface();
-
+	bool place_tile(int x, int y, tile Tile, std::vector<tile>& map);
+	tile get_tile(int x, int y, std::vector<tile> map);
+	std::vector<tile> generate_surface();
+}
 
 
 

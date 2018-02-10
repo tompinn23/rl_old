@@ -31,10 +31,11 @@
 
 //#include "duktape.h"
 //#include "duk_config.h"
+namespace rl
+{
+	int initialise_interface(std::string &dir);
+	int deinitialise_interface();
 
-int initialise_interface(std::string &dir);
-int deinitialise_interface();
-
-int run_file(fs::path path);
-
+	int run_file(fs::path path);
+}
 #endif

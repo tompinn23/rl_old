@@ -21,20 +21,22 @@
 #include <string>
 #include <tuple>
 
-class player
+namespace rl
 {
-public:
-    player(int x, int y, std::string name);
-    void move_player(int dx, int dy);
-    std::tuple<int, int> screen_transform(int x, int y);
-private:
-    int p_x = 0;
-    int p_y = 0;
-    std::string name;
+	class player
+	{
+	public:
+		player(int x, int y, std::string name);
+		void move_player(int dx, int dy);
+		std::tuple<int, int> screen_transform(int x, int y);
+	private:
+		int p_x = 0;
+		int p_y = 0;
+		std::string name;
 
-    int camera_width = 60;
-    int camera_height = 40;
+		int camera_width = 60;
+		int camera_height = 40;
 
-};
-
+	};
+}
 #endif

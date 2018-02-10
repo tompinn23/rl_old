@@ -4,16 +4,18 @@
 #include <string>
 #include <vector>
 
-typedef unsigned char tile;
+namespace rl
+{
+	typedef unsigned char tile;
 
-typedef struct {
-    std::string name;
-    std::vector<std::string> attrs;
-    std::vector<tile> plan;
-} room;
+	typedef struct {
+		std::string name;
+		std::vector<std::string> attrs;
+		std::vector<tile> plan;
+	} rl_room;
 
 
 
-void add_to_registry(room room, bool surface);
-
+	void add_to_registry(rl_room room, bool surface);
+	}
 #endif // !REGISTRY_H

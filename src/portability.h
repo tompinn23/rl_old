@@ -22,17 +22,19 @@
 #include <string>
 
 #include "fs.h"
+namespace rl
+{
+	typedef struct {
+		bool isDirectory;
+		std::string name;
+	} rl_file;
 
-typedef struct {
-	bool isDirectory;
-	std::string name;
-} rl_file;
+	fs::path get_exe_dir();
 
-fs::path get_exe_dir();
+	//const std::string get_path(std::string path);
 
-//const std::string get_path(std::string path);
+	std::vector<rl_file> list_files(std::string dir);
 
-std::vector<rl_file> list_files(std::string dir);
-
-void add_handlers();
+	void add_handlers();
+}
 #endif
