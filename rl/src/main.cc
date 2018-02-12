@@ -127,9 +127,12 @@ int main(int argc,  char** argv)
 		auto logger = init_logger();
 		add_handlers();
 		spd::set_pattern("(%l) [%H:%M:%S %d/%m/%C] %v");
+		
+		
 		args::ArgumentParser parser("rl");
-		args::HelpFlag help(parser, "help", "Display this help menu", { 'h', "help"});
-		args::Flag debug(parser , "debug", "Enables debug messages", {'d', "debug"});
+		args::HelpFlag help(parser, "help", "Display this help menu.", { 'h', "help"});
+		args::Flag debug(parser , "debug", "Enables debug messages.", {'d', "debug"});
+		args::ValueFlag<string> run(parser, "run", "Runs a custom lua file, then exit.", {'r', "run"});
 		try
 		{
         parser.ParseCLI(argc, argv);
@@ -144,11 +147,9 @@ int main(int argc,  char** argv)
 			std::cerr << e.what() << std::endl;
 			std::cerr << parser;
 			return 1;
-		}	
-		if(debug)
-		{
-			spd::set_level(spd::level::debug);
 		}
+		
+		
 		logger->info("Rl v{}", RL_VERSION);
 		fs::path exe_dir = get_exe_dir();
 		for(auto const &f : fs::directory_iterator(exe_dir / "lib"))
@@ -169,6 +170,18 @@ int main(int argc,  char** argv)
 			logger->error("Failed to read game data files.");
 			return -1;
 		  }
+		  
+		  
+		// Parse flags.
+		if(debug)
+		{
+			spd::set_level(spd::level::debug);
+		}
+		if(run)
+		{
+			run_file(get_exe_dir() / args::get(run));
+			return 0;
+		}
 		run_file(get_exe_dir() / "lib/rooms.lua");
 		terminal_open();
 		terminal_set(fmt::format("font: {}, size=8x8;", (get_exe_dir() / "terminal_8x8.png").string()).c_str());

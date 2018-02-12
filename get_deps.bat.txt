@@ -1,0 +1,12 @@
+powershell -Command "(New-Object Net.WebClient).DownloadFile('https://www.lua.org/ftp/lua-5.3.4.tar.gz', 'lua.tar.gz')"
+cd src
+cmd /c "cmake -E tar xvf ../lua.tar.gz"
+cd ..
+del lua.tar.gz
+
+powershell -Command "(New-Object Net.WebClient).DownloadFile('https://bitbucket.org/cfyzium/bearlibterminal/get/tip.tar.gz', 'bearlibterminal.tar.gz')"
+cd src
+cmd /c "cmake -E tar xvf ../bearlibterminal.tar.gz"
+cmd /c move "cfy*" bearlibterminal
+cd ..
+del bearlibterminal.tar.gz

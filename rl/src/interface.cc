@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include <iostream>
+#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #include "sol.hpp"
 //#include <Python.h>
 
@@ -59,10 +60,6 @@ namespace rl
 		sol::optional<string> desc = room_table["desc"];
 		sol::optional<sol::table> attrs = room_table["attrs"];
 		sol::optional<sol::table> plan = room_table["plan"];
-		int count = room_table.size();
-		cout << count;
-		for(int i = 1; i <= count; ++i)
-			cout << room_table[i].get<string>() << "\n" << i << "\n";
 		if(name)
 			rl_logger->debug(name.value());
 		else
@@ -76,12 +73,15 @@ namespace rl
 		}
 		else
 		{
-			rl_logger->error("Room Description does not exist for declaration at {}:{}", info.short_src, info.currentline);
-			missing = true;
+			rl_logger->warn("Room Description does not exist for declaration at {}:{}", info.short_src, info.currentline);
 		}
 		if(attrs)
 		{
-			
+			size_t count = attrs.value().size();
+			for(int i = 1; i <= count; ++i)
+			{
+				rl_logger->debug(attrs.value()[i].get<string>());
+			}
 		}
 		
 		return true;
